@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/joybiswas007/url-shortner-go/internal/database"
 	"github.com/joybiswas007/url-shortner-go/server"
 )
 
@@ -22,7 +23,16 @@ func main() {
 	flag.IntVar(&app.port, "port", 8000, "--port")
 	flag.Parse()
 
-	srv := server.NewServer(app.port)
+	db, err := database.New()
+	if err != nil {
+		log.Panic(err)
+	}
+	defer func() {
+		log.Println("Disconnected from database")
+		db.Close()
+	}()
+
+	srv := server.NewServer(app.port, db)
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool)
@@ -30,7 +40,7 @@ func main() {
 	// Run graceful shutdown in a separate goroutine
 	go gracefulShutdown(srv, done)
 
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		panic(fmt.Sprintf("http server error: %s", err))
 	}

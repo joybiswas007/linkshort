@@ -2,25 +2,29 @@
 package server
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/joybiswas007/url-shortner-go/internal/database"
 	v1 "github.com/joybiswas007/url-shortner-go/server/router/api/v1"
 )
 
 // Server holds the HTTP server configuration and dependencies.
 type Server struct {
-	port int
+	port   int
+	models database.Models
 }
 
 // NewServer creates and configures a new HTTP server instance.
-func NewServer(port int) *http.Server {
+func NewServer(port int, db *sql.DB) *http.Server {
 	NewServer := &Server{
-		port: port,
+		port:   port,
+		models: database.NewModels(db),
 	}
 
-	v1Server := v1.NewAPIV1Service()
+	v1Server := v1.NewAPIV1Service(NewServer.models)
 
 	// Declare Server config.
 	server := &http.Server{

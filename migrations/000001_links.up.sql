@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS "links" (
+	"id" INTEGER NOT NULL UNIQUE,
+	"code" VARCHAR NOT NULL UNIQUE,
+	"short_url" VARCHAR NOT NULL,
+	"original_url" VARCHAR NOT NULL,
+	"expires_at" TIMESTAMP,
+	"created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	"updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY("id")
+);
+
+CREATE INDEX IF NOT EXISTS "links_index_0"
+ON "links" ("id", "code");
