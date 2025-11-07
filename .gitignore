@@ -27,6 +27,8 @@ tmp/
 # .env file
 .env
 
+# Ignore databse
+*.db
 
 # Project build
 

@@ -32,6 +32,10 @@ func main() {
 		db.Close()
 	}()
 
+	if err := database.Migrate(db); err != nil {
+		log.Panic(err)
+	}
+
 	srv := server.NewServer(app.port, db)
 
 	// Create a done channel to signal when the shutdown is complete

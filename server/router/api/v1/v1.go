@@ -4,8 +4,8 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
-	"time"
 
 	"github.com/joybiswas007/url-shortner-go/internal/database"
 	"github.com/joybiswas007/url-shortner-go/server/router/frontend"
@@ -36,8 +36,8 @@ func (s *APIV1Service) RegisterRoutes() http.Handler {
 
 func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	var input struct {
-		URL       string     `json:"url"`
-		ExpiresAt *time.Time `json:"expires_at"`
+		URL       string `json:"url"`
+		ExpiresAt int    `json:"expires_at,omitempty"`
 	}
 
 	err := readJSON(w, r, &input)
@@ -52,11 +52,38 @@ func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
+	exists, err := s.db.Links.Exists(code)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	var shortCode string
+	if exists {
+		shortCode, err = GenerateShortCode(6)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	} else {
+		shortCode = code
+	}
+
+	link := &database.Link{
+		Code:        shortCode,
+		ShortURL:    fmt.Sprintf("http://localhost:8000/%s", shortCode),
+		OriginalURL: input.URL,
+	}
+
+	err = s.db.Links.Create(link)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	response := map[string]string{"message": code}
 
-	err = json.NewEncoder(w).Encode(response)
+	err = json.NewEncoder(w).Encode(link)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("%v", err), http.StatusInternalServerError)
 		return
