@@ -24,7 +24,6 @@ func Serve(r *httprouter.Router) {
 	r.GET("/", serveIndex(distFS))
 
 	r.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.RequestURI)
 		if !strings.HasPrefix(r.RequestURI, "/api") {
 			serveIndex(distFS)
 		}
@@ -33,10 +32,10 @@ func Serve(r *httprouter.Router) {
 
 // serveIndex returns a handler that serves index.html
 func serveIndex(fsys http.FileSystem) httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		index, err := fsys.Open("index.html")
 		if err != nil {
-			log.Println("Error opening index.html:", err)
+			log.Printf("Could not open index.html: %v\n", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -44,12 +43,12 @@ func serveIndex(fsys http.FileSystem) httprouter.Handle {
 
 		stat, err := index.Stat()
 		if err != nil {
-			log.Println("Error getting file stats:", err)
+			log.Printf("Could not get file stats: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
-		http.ServeContent(w, req, "index.html", stat.ModTime(), index)
+		http.ServeContent(w, r, "index.html", stat.ModTime(), index)
 	}
 }
 
