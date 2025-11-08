@@ -1,44 +1,38 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    /* Gruvbox Dark Palette */
-    --color-bg-primary: #282828;
-    --color-bg-secondary: #3c3836;
-    --color-bg-tertiary: #504945;
-    --color-text-primary: #fbf1c7;
-    --color-text-secondary: #d5c4a1;
-    --color-accent-green: #b8bb26;
-    --color-accent-blue: #83a598;
-    --color-accent-orange: #fe8019;
-    --color-accent-red: #fb4934;
-    --color-border: #665c54;
-    --font-family: "JetBrains Mono", "Fira Code", monospace;
-  }
+@theme {
+  /* Gruvbox Dark Theme Colors */
+  --color-bg-primary: #282828;
+  --color-bg-secondary: #3c3836;
+  --color-bg-tertiary: #504945;
 
-  * {
-    @apply font-[--font-family];
-  }
+  --color-fg-primary: #ebdbb2;
+  --color-fg-secondary: #d5c4a1;
+  --color-fg-muted: #a89984;
 
-  body {
-    @apply bg-[--color-bg-primary] text-[--color-text-primary];
-  }
+  --color-red: #fb4934;
+  --color-red-muted: #cc241d;
+  --color-green: #b8bb26;
+  --color-green-muted: #98971a;
+  --color-yellow: #fabd2f;
+  --color-yellow-muted: #d79921;
+  --color-blue: #83a598;
+  --color-blue-muted: #458588;
+  --color-purple: #d3869b;
+  --color-purple-muted: #b16286;
+  --color-aqua: #8ec07c;
+  --color-aqua-muted: #689d6a;
+  --color-orange: #fe8019;
+  --color-orange-muted: #d65d0e;
+
+  --font-display: "Inter", sans-serif;
 }
 
-@layer components {
-  .input-base {
-    @apply w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border-2 border-[--color-border] text-[--color-text-primary] placeholder-[--color-text-secondary] focus:outline-none focus:border-[--color-accent-blue] transition-colors;
-  }
+* {
+  font-family: var(--font-display);
+}
 
-  .button-primary {
-    @apply px-6 py-3 rounded-lg bg-[--color-accent-green] text-[--color-bg-primary] font-semibold hover:bg-[--color-accent-blue] transition-colors;
-  }
-
-  .button-secondary {
-    @apply px-6 py-3 rounded-lg bg-[--color-bg-secondary] border-2 border-[--color-accent-blue] text-[--color-text-primary] font-semibold hover:bg-[--color-bg-tertiary] transition-colors;
-  }
-
-  .card {
-    @apply bg-[--color-bg-secondary] rounded-lg border-2 border-[--color-border] p-6;
-  }
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-fg-primary);
 }
