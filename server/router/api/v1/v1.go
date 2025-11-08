@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/joybiswas007/url-shortner-go/internal/database"
-	"github.com/joybiswas007/url-shortner-go/server/router/frontend"
+	"github.com/joybiswas007/linkshortner-go/internal/database"
+	"github.com/joybiswas007/linkshortner-go/server/router/frontend"
 	"github.com/julienschmidt/httprouter"
 )
 
