@@ -9,12 +9,14 @@ import (
 	"math/big"
 	"net/http"
 	"strings"
+
+	"github.com/go-playground/validator/v10"
 )
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 // GenerateShortCode generates a random short code
-func GenerateShortCode(length int) (string, error) {
+func (s *APIV1Service) GenerateShortCode(length int) (string, error) {
 	code := make([]byte, length)
 	for i := range code {
 		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
@@ -88,4 +90,38 @@ func (s *APIV1Service) errorResponse(w http.ResponseWriter, status int, message 
 	if err != nil {
 		w.WriteHeader(500)
 	}
+}
+
+// inputValidationErrors processes validator errors and responds with a formatted JSON error.
+func (s *APIV1Service) inputValidationErrors(w http.ResponseWriter, err error) {
+	if errs, ok := err.(validator.ValidationErrors); ok {
+		var errMessages []map[string]string
+		for _, err := range errs {
+			field := strings.ToLower(err.Field())
+			tag := err.Tag()
+			var message string
+
+			switch tag {
+			case "required":
+				message = fmt.Sprintf("%s must be provided", field)
+			case "min", "gte":
+				message = fmt.Sprintf("%s must be at least %s character long", field, err.Param())
+			case "max", "lte":
+				message = fmt.Sprintf("%s must not be more than %s character long", field, err.Param())
+			case "url":
+				message = fmt.Sprintf("%s must be valid type", field)
+			default:
+				message = fmt.Sprintf("invalid input for %s", field)
+			}
+
+			errMessages = append(errMessages, map[string]string{field: message})
+		}
+
+		err = s.writeJSON(w, http.StatusBadRequest, map[string]any{"errors": errMessages})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+	s.errorResponse(w, http.StatusBadRequest, err.Error())
 }

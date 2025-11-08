@@ -35,12 +35,6 @@ tmp/
 # Ignore generated templ file
 *templ.go
 
-# Ignore favicon
-cmd/web/assets/favicon.ico
-
-# Ignore generated CSS
-cmd/web/assets/css/output.css
-
 # OS X generated file
 .DS_Store
 

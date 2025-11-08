@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/joybiswas007/url-shortner-go/internal/database"
 	"github.com/joybiswas007/url-shortner-go/server/router/frontend"
 	"github.com/julienschmidt/httprouter"
@@ -41,7 +42,7 @@ func (s *APIV1Service) RegisterRoutes() http.Handler {
 
 func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	var input struct {
-		URL       string `json:"url"`
+		URL       string `json:"url" validate:"required,url,max=255"`
 		ExpiresAt int    `json:"expires_at,omitempty"`
 	}
 
@@ -51,7 +52,14 @@ func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	code, err := GenerateShortCode(6)
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	if err := validate.Struct(&input); err != nil {
+		s.inputValidationErrors(w, err)
+		return
+	}
+
+	code, err := s.generateShortCode(6)
 	if err != nil {
 		s.errorResponse(w, http.StatusBadRequest, err.Error())
 		return
@@ -64,7 +72,7 @@ func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, 
 	}
 	var shortCode string
 	if exists {
-		shortCode, err = GenerateShortCode(6)
+		shortCode, err = s.generateShortCode(6)
 		if err != nil {
 			s.errorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -77,6 +85,10 @@ func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, 
 		Code:        shortCode,
 		ShortURL:    fmt.Sprintf("http://localhost:8000/%s", shortCode),
 		OriginalURL: input.URL,
+	}
+
+	if input.ExpiresAt > 0 {
+		link.ExpiresAt = input.ExpiresAt
 	}
 
 	err = s.db.Links.Create(link)
