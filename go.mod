@@ -1,4 +1,4 @@
-module github.com/joybiswas007/linkshort-go
+module github.com/joybiswas007/linkshort
 
 go 1.25.3
 

@@ -10,8 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/joybiswas007/linkshort-go/internal/database"
-	"github.com/joybiswas007/linkshort-go/server"
+	"github.com/joybiswas007/linkshort/internal/database"
+	"github.com/joybiswas007/linkshort/server"
 )
 
 type application struct {
