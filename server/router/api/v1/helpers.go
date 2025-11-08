@@ -104,10 +104,6 @@ func (s *APIV1Service) inputValidationErrors(w http.ResponseWriter, err error) {
 			switch tag {
 			case "required":
 				message = fmt.Sprintf("%s must be provided", field)
-			case "min", "gte":
-				message = fmt.Sprintf("%s must be at least %s character long", field, err.Param())
-			case "max", "lte":
-				message = fmt.Sprintf("%s must not be more than %s character long", field, err.Param())
 			case "url":
 				message = fmt.Sprintf("%s must be valid type", field)
 			default:

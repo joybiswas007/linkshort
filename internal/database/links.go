@@ -13,7 +13,6 @@ type Link struct {
 	ShortURL    string    `json:"short_url"`
 	OriginalURL string    `json:"original_url"`
 	ExpiresAt   int       `json:"expires_at,omitempty"`
-	Views       int       `json:"-"`
 	CreatedAt   time.Time `json:"-"`
 	UpdatedAt   time.Time `json:"-"`
 }
@@ -87,24 +86,4 @@ func (m LinkModel) GetByCode(code string) (*Link, error) {
 	}
 
 	return &l, nil
-}
-
-// UpdateViews increments the view count for a specific url by id.
-func (m LinkModel) UpdateViews(linkID int) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	query := `UPDATE links SET views = views + 1 WHERE id = $1`
-
-	stmt, err := m.DB.PrepareContext(ctx, query)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.ExecContext(ctx, linkID)
-	if err != nil {
-		return err
-	}
-	return nil
 }
