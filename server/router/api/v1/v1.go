@@ -4,6 +4,7 @@ package v1
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/joybiswas007/url-shortner-go/internal/database"
@@ -26,6 +27,7 @@ func (s *APIV1Service) RegisterRoutes() http.Handler {
 	r := httprouter.New()
 
 	r.POST("/api/v1/links", s.shortLinkHandler)
+	r.GET("/api/v1/links/:code", s.linkByCodeHandler)
 
 	// serve the frontend
 	frontend.Serve(r)
@@ -94,6 +96,48 @@ func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, 
 	err = s.db.Links.Create(link)
 	if err != nil {
 		s.errorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = s.writeJSON(w, http.StatusOK, link)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (s *APIV1Service) linkByCodeHandler(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	code := params.ByName("code")
+	if code == "" {
+		s.errorResponse(w, http.StatusBadRequest, "missing required path parameter: code")
+		return
+	}
+
+	exists, err := s.db.Links.Exists(code)
+	if err != nil {
+		s.errorResponse(w, http.StatusBadRequest, "invalid code")
+		return
+	}
+
+	if !exists {
+		s.errorResponse(w, http.StatusBadRequest, "link not found for code")
+		return
+	}
+
+	link, err := s.db.Links.GetByCode(code)
+	if err != nil {
+		s.errorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	nowMs := time.Now().UnixMilli()
+	if link.ExpiresAt > 0 && nowMs >= int64(link.ExpiresAt) {
+		s.errorResponse(w, http.StatusBadRequest, "link has expired")
+		return
+	}
+
+	err = s.db.Links.UpdateViews(link.ID)
+	if err != nil {
+		s.errorResponse(w, http.StatusBadRequest, "something went wrong!")
 		return
 	}
 

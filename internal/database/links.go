@@ -3,17 +3,19 @@ package database
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 )
 
 type Link struct {
-	ID          int       `db:"id" json:"-"`
-	Code        string    `db:"code" json:"code"`
-	ShortURL    string    `db:"short_url" json:"short_url"`
-	OriginalURL string    `db:"original_url" json:"original_url"`
-	ExpiresAt   int       `db:"expires_at" json:"expires_at,omitempty"`
-	CreatedAt   time.Time `db:"created_at" json:"-"`
-	UpdatedAt   time.Time `db:"updated_at" json:"-"`
+	ID          int       `json:"-"`
+	Code        string    `json:"code"`
+	ShortURL    string    `json:"short_url"`
+	OriginalURL string    `json:"original_url"`
+	ExpiresAt   int       `json:"expires_at,omitempty"`
+	Views       int       `json:"-"`
+	CreatedAt   time.Time `json:"-"`
+	UpdatedAt   time.Time `json:"-"`
 }
 
 type LinkModel struct {
@@ -56,4 +58,53 @@ func (m LinkModel) Exists(code string) (bool, error) {
 	}
 
 	return exists, nil
+}
+
+func (m LinkModel) GetByCode(code string) (*Link, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	const query = `
+        SELECT id, code, short_url, original_url, expires_at
+        FROM links
+        WHERE code = $1
+    `
+
+	var l Link
+	// If expires_at can be NULL in DB, prefer sql.NullTime or *time.Time in the struct.
+	err := m.DB.QueryRowContext(ctx, query, code).Scan(
+		&l.ID,
+		&l.Code,
+		&l.ShortURL,
+		&l.OriginalURL,
+		&l.ExpiresAt,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, sql.ErrNoRows
+		}
+		return nil, err
+	}
+
+	return &l, nil
+}
+
+// UpdateViews increments the view count for a specific url by id.
+func (m LinkModel) UpdateViews(linkID int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `UPDATE links SET views = views + 1 WHERE id = $1`
+
+	stmt, err := m.DB.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.ExecContext(ctx, linkID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
