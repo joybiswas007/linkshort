@@ -4,11 +4,8 @@ import axios from "axios";
 const EXPIRY_OPTIONS = [
   { value: "", label: "No Expiry" },
   { value: "10", label: "10 Minutes" },
-  { value: "30", label: "30 Minutes" },
   { value: "60", label: "1 Hour" },
   { value: "180", label: "3 Hours" },
-  { value: "360", label: "6 Hours" },
-  { value: "720", label: "12 Hours" },
   { value: "1440", label: "1 Day" },
   { value: "4320", label: "3 Days" },
   { value: "10080", label: "1 Week" },
@@ -32,20 +29,16 @@ const Home = () => {
 
     try {
       const payload = { url };
-
-      if (expiryMinutes && expiryMinutes !== "") {
+      if (expiryMinutes !== "") {
         const minutes = parseInt(expiryMinutes, 10);
-        const expiryTimestamp = Date.now() + minutes * 60 * 1000;
-        payload.expires_at = expiryTimestamp;
+        payload.expires_at = Date.now() + minutes * 60 * 1000;
       }
 
       const response = await axios.post(
         "http://localhost:8000/api/v1/links",
         payload,
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         },
       );
 
@@ -64,223 +57,265 @@ const Home = () => {
   };
 
   const handleCopy = async () => {
+    if (!result?.short_url) return;
     try {
       await navigator.clipboard.writeText(result.short_url);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
-    }
+      setTimeout(() => setCopied(false), 1600);
+    } catch {}
   };
 
   const formatExpiry = (timestamp) => {
     if (!timestamp) return null;
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = date - now;
-
+    const diff = timestamp - Date.now();
     if (diff <= 0) return "Expired";
-
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) return `${days}d`;
-    if (hours > 0) return `${hours}h`;
-    return `${minutes}m`;
+    const m = Math.floor(diff / 60000);
+    const h = Math.floor(m / 60);
+    const d = Math.floor(h / 24);
+    if (d > 0) return `${d}d`;
+    if (h > 0) return `${h}h`;
+    return `${m}m`;
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-      <div className="w-full max-w-2xl">
-        <div className="text-center mb-16">
-          <h1
-            className="text-6xl font-bold mb-4 tracking-tight"
-            style={{ color: "var(--color-yellow)" }}
-          >
-            URL Shortener
-          </h1>
-          <p className="text-xl" style={{ color: "var(--color-fg-secondary)" }}>
-            Shorten your links with optional expiry time
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label
-              htmlFor="url"
-              className="block text-sm font-medium mb-2 tracking-wide uppercase"
-              style={{ color: "var(--color-aqua)" }}
-            >
-              URL to Shorten
-            </label>
-            <input
-              type="url"
-              id="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://example.com/very/long/url"
-              required
-              className="w-full px-5 py-3 text-base border-2 focus:outline-none transition-all duration-200"
-              style={{
-                backgroundColor: "var(--color-bg-secondary)",
-                borderColor: "var(--color-bg-tertiary)",
-                color: "var(--color-fg-primary)",
-              }}
-              onFocus={(e) =>
-                (e.target.style.borderColor = "var(--color-yellow)")
-              }
-              onBlur={(e) =>
-                (e.target.style.borderColor = "var(--color-bg-tertiary)")
-              }
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <header style={{ backgroundColor: "var(--color-bg-primary)" }}>
+        <div className="mx-auto w-full max-w-3xl px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span
+              className="inline-block h-3 w-3 rounded-sm"
+              style={{ backgroundColor: "var(--color-yellow)" }}
+              aria-hidden="true"
             />
-          </div>
-
-          <div>
-            <label
-              htmlFor="expiry"
-              className="block text-sm font-medium mb-2 tracking-wide uppercase"
-              style={{ color: "var(--color-aqua)" }}
+            <span
+              className="text-lg font-semibold tracking-tight"
+              style={{ color: "var(--color-fg-primary)" }}
             >
-              Expiry Time
-            </label>
-            <div className="relative">
-              <select
-                id="expiry"
-                value={expiryMinutes}
-                onChange={(e) => setExpiryMinutes(e.target.value)}
-                className="w-full px-5 py-3 text-base border-2 focus:outline-none transition-all duration-200 appearance-none cursor-pointer"
+              LinkShort
+            </span>
+          </div>
+          <span
+            className="text-xs uppercase tracking-widest"
+            style={{ color: "var(--color-fg-muted)" }}
+          >
+            no-nonsense url shortener
+          </span>
+        </div>
+      </header>
+
+      {/* Main */}
+      <main className="flex-1">
+        <div className="mx-auto w-full max-w-3xl px-4 py-10">
+          {/* Form row, no borders */}
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 gap-3 md:grid-cols-[1fr,160px,120px]"
+          >
+            <div>
+              <label
+                htmlFor="url"
+                className="block text-[11px] mb-1 tracking-wider uppercase"
+                style={{ color: "var(--color-aqua)" }}
+              >
+                URL{" "}
+                <span
+                  className="normal-case text-[11px]"
+                  style={{ color: "var(--color-red)" }}
+                >
+                  (required)
+                </span>
+              </label>
+              <input
+                type="url"
+                id="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://example.com/something"
+                required
+                className="w-full px-4 py-2.5 text-sm focus:outline-none transition-colors"
                 style={{
                   backgroundColor: "var(--color-bg-secondary)",
-                  borderColor: "var(--color-bg-tertiary)",
                   color: "var(--color-fg-primary)",
+                  boxShadow: "inset 0 0 0 2px var(--color-bg-tertiary)",
                 }}
                 onFocus={(e) =>
-                  (e.target.style.borderColor = "var(--color-yellow)")
+                  (e.target.style.boxShadow =
+                    "inset 0 0 0 2px var(--color-yellow)")
                 }
                 onBlur={(e) =>
-                  (e.target.style.borderColor = "var(--color-bg-tertiary)")
+                  (e.target.style.boxShadow =
+                    "inset 0 0 0 2px var(--color-bg-tertiary)")
                 }
-              >
-                {EXPIRY_OPTIONS.map((option) => (
-                  <option
-                    key={option.value}
-                    value={option.value}
-                    style={{
-                      backgroundColor: "var(--color-bg-secondary)",
-                      color: "var(--color-fg-primary)",
-                    }}
-                  >
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="2"
-                stroke="currentColor"
-                className="h-5 w-5 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
-                style={{ color: "var(--color-fg-muted)" }}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                />
-              </svg>
+              />
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 text-base font-semibold tracking-wide transition-all duration-200 hover:translate-y-[-2px] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-            style={{
-              backgroundColor: "var(--color-yellow)",
-              color: "var(--color-bg-primary)",
-            }}
-          >
-            {loading ? "Shortening..." : "Shorten URL"}
-          </button>
-        </form>
-
-        {error && (
-          <div
-            className="mt-6 p-3 border-l-4"
-            style={{
-              borderColor: "var(--color-red)",
-              backgroundColor: "var(--color-bg-secondary)",
-            }}
-          >
-            <p
-              className="text-sm font-medium"
-              style={{ color: "var(--color-red)" }}
-            >
-              {error.error || "An error occurred"}
-            </p>
-            {error.errors &&
-              Array.isArray(error.errors) &&
-              error.errors.length > 0 && (
-                <ul className="mt-1 text-sm space-y-1">
-                  {error.errors.map((err, index) => (
-                    <li
-                      key={index}
-                      style={{ color: "var(--color-fg-primary)" }}
-                    >
-                      {Object.entries(err)
-                        .map(([key, value]) => value)
-                        .join(", ")}
-                    </li>
-                  ))}
-                </ul>
-              )}
-          </div>
-        )}
-
-        {result && (
-          <div
-            className="mt-6 p-4 border-l-4 flex items-center gap-3"
-            style={{
-              borderColor: "var(--color-green)",
-              backgroundColor: "var(--color-bg-secondary)",
-            }}
-          >
-            <div className="flex-1 min-w-0">
-              <a
-                href={result.short_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-lg font-semibold hover:underline block truncate"
-                style={{ color: "var(--color-yellow)" }}
+            <div>
+              <label
+                htmlFor="expiry"
+                className="block text-[11px] mb-1 tracking-wider uppercase"
+                style={{ color: "var(--color-aqua)" }}
               >
-                {result.short_url}
-              </a>
-              {result.expires_at && (
+                Expiry{" "}
                 <span
-                  className="text-sm"
-                  style={{ color: "var(--color-orange)" }}
+                  className="normal-case text-[11px]"
+                  style={{ color: "var(--color-fg-muted)" }}
                 >
-                  Expires in {formatExpiry(result.expires_at)}
+                  (optional)
                 </span>
-              )}
+              </label>
+              <div className="relative">
+                <select
+                  id="expiry"
+                  value={expiryMinutes}
+                  onChange={(e) => setExpiryMinutes(e.target.value)}
+                  className="w-full px-4 py-2.5 text-sm focus:outline-none appearance-none cursor-pointer transition-colors"
+                  style={{
+                    backgroundColor: "var(--color-bg-secondary)",
+                    color: "var(--color-fg-primary)",
+                    boxShadow: "inset 0 0 0 2px var(--color-bg-tertiary)",
+                  }}
+                  onFocus={(e) =>
+                    (e.target.style.boxShadow =
+                      "inset 0 0 0 2px var(--color-yellow)")
+                  }
+                  onBlur={(e) =>
+                    (e.target.style.boxShadow =
+                      "inset 0 0 0 2px var(--color-bg-tertiary)")
+                  }
+                >
+                  {EXPIRY_OPTIONS.map((o) => (
+                    <option
+                      key={o.value}
+                      value={o.value}
+                      style={{
+                        backgroundColor: "var(--color-bg-secondary)",
+                        color: "var(--color-fg-primary)",
+                      }}
+                    >
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                  style={{ color: "var(--color-fg-muted)" }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                  />
+                </svg>
+              </div>
             </div>
-            <button
-              onClick={handleCopy}
-              className="px-5 py-2 text-sm font-semibold transition-all duration-200 hover:translate-y-[-1px] shrink-0"
-              style={{
-                backgroundColor: copied
-                  ? "var(--color-green)"
-                  : "var(--color-blue)",
-                color: "var(--color-bg-primary)",
-              }}
+
+            <div className="flex items-end">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-2.5 text-sm font-semibold tracking-wide transition-transform hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+                style={{
+                  backgroundColor: "var(--color-yellow)",
+                  color: "var(--color-bg-primary)",
+                }}
+              >
+                {loading ? "Shortening…" : "Shorten"}
+              </button>
+            </div>
+          </form>
+
+          {/* Error — no borders */}
+          {error && (
+            <div
+              className="mt-3 p-2.5"
+              style={{ backgroundColor: "var(--color-bg-secondary)" }}
             >
-              {copied ? "✓" : "Copy"}
-            </button>
-          </div>
-        )}
-      </div>
+              <p
+                className="text-xs font-medium"
+                style={{ color: "var(--color-red)" }}
+              >
+                {error.error || "An error occurred"}
+              </p>
+              {error.errors &&
+                Array.isArray(error.errors) &&
+                error.errors.length > 0 && (
+                  <ul
+                    className="mt-1 text-xs space-y-0.5"
+                    style={{ color: "var(--color-fg-primary)" }}
+                  >
+                    {error.errors.map((err, idx) => (
+                      <li key={idx}>{Object.values(err).join(", ")}</li>
+                    ))}
+                  </ul>
+                )}
+            </div>
+          )}
+
+          {/* Result — no borders, ultra-compact */}
+          {result && (
+            <div
+              className="mt-3 p-3 flex items-center gap-3"
+              style={{ backgroundColor: "var(--color-bg-secondary)" }}
+            >
+              <div className="flex-1 min-w-0">
+                <a
+                  href={result.short_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-semibold hover:underline block truncate"
+                  style={{ color: "var(--color-yellow)" }}
+                >
+                  {result.short_url}
+                </a>
+                {result.expires_at && (
+                  <span
+                    className="text-[11px]"
+                    style={{ color: "var(--color-orange)" }}
+                  >
+                    in {formatExpiry(result.expires_at)}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={handleCopy}
+                className="px-3 py-1.5 text-xs font-semibold transition-transform hover:-translate-y-0.5 shrink-0"
+                style={{
+                  backgroundColor: copied
+                    ? "var(--color-green)"
+                    : "var(--color-blue)",
+                  color: "var(--color-bg-primary)",
+                }}
+              >
+                {copied ? "Copied" : "Copy"}
+              </button>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Footer — minimal, no borders */}
+      <footer style={{ backgroundColor: "var(--color-bg-primary)" }}>
+        <div className="mx-auto w-full max-w-3xl px-4 py-3 flex items-center justify-between">
+          <span
+            className="text-[11px]"
+            style={{ color: "var(--color-fg-muted)" }}
+          >
+            LinkShort — no-nonsense url shortener
+          </span>
+          <span
+            className="text-[11px]"
+            style={{ color: "var(--color-fg-muted)" }}
+          >
+            Built for developers
+          </span>
+        </div>
+      </footer>
     </div>
   );
 };
