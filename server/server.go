@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/joybiswas007/linkshortner-go/internal/database"
-	v1 "github.com/joybiswas007/linkshortner-go/server/router/api/v1"
+	"github.com/joybiswas007/linkshort-go/internal/database"
+	v1 "github.com/joybiswas007/linkshort-go/server/router/api/v1"
 )
 
 // Server holds the HTTP server configuration and dependencies.
