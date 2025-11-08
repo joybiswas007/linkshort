@@ -44,7 +44,7 @@ func (s *APIV1Service) RegisterRoutes() http.Handler {
 
 func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	var input struct {
-		URL       string `json:"url" validate:"required,url,max=255"`
+		URL       string `json:"url" validate:"required,url"`
 		ExpiresAt int    `json:"expires_at,omitempty"`
 	}
 
@@ -132,12 +132,6 @@ func (s *APIV1Service) linkByCodeHandler(w http.ResponseWriter, r *http.Request,
 	nowMs := time.Now().UnixMilli()
 	if link.ExpiresAt > 0 && nowMs >= int64(link.ExpiresAt) {
 		s.errorResponse(w, http.StatusBadRequest, "link has expired")
-		return
-	}
-
-	err = s.db.Links.UpdateViews(link.ID)
-	if err != nil {
-		s.errorResponse(w, http.StatusBadRequest, "something went wrong!")
 		return
 	}
 
