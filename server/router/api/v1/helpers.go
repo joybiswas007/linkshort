@@ -26,7 +26,7 @@ func GenerateShortCode(length int) (string, error) {
 	return string(code), nil
 }
 
-func readJSON(w http.ResponseWriter, r *http.Request, dst any) error {
+func (s *APIV1Service) readJSON(w http.ResponseWriter, r *http.Request, dst any) error {
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 
@@ -68,4 +68,24 @@ func readJSON(w http.ResponseWriter, r *http.Request, dst any) error {
 		return errors.New("body must only contain a single JSON value")
 	}
 	return nil
+}
+
+func (s *APIV1Service) writeJSON(w http.ResponseWriter, status int, data any) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+
+	err := json.NewEncoder(w).Encode(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *APIV1Service) errorResponse(w http.ResponseWriter, status int, message any) {
+	data := map[string]any{"error": message}
+
+	err := s.writeJSON(w, status, data)
+	if err != nil {
+		w.WriteHeader(500)
+	}
 }

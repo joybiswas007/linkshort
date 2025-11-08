@@ -2,9 +2,7 @@
 package v1
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/joybiswas007/url-shortner-go/internal/database"
@@ -31,7 +29,14 @@ func (s *APIV1Service) RegisterRoutes() http.Handler {
 	// serve the frontend
 	frontend.Serve(r)
 
-	return r
+	production := false
+
+	switch production {
+	case true:
+		return s.recoverPanic(s.rateLimit(r))
+	default:
+		return s.recoverPanic(s.enableCORS(s.rateLimit(r)))
+	}
 }
 
 func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -40,28 +45,28 @@ func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, 
 		ExpiresAt int    `json:"expires_at,omitempty"`
 	}
 
-	err := readJSON(w, r, &input)
+	err := s.readJSON(w, r, &input)
 	if err != nil {
-		http.Error(w, err.Error(), r.Response.StatusCode)
+		s.errorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	code, err := GenerateShortCode(6)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		s.errorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	exists, err := s.db.Links.Exists(code)
 	if err != nil {
-		log.Println(err)
+		s.errorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	var shortCode string
 	if exists {
 		shortCode, err = GenerateShortCode(6)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			s.errorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 	} else {
@@ -76,16 +81,12 @@ func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, 
 
 	err = s.db.Links.Create(link)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		s.errorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	err = json.NewEncoder(w).Encode(link)
+	err = s.writeJSON(w, http.StatusOK, link)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("%v", err), http.StatusInternalServerError)
-		return
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
