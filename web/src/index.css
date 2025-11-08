@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @theme {
-  /* Gruvbox Dark Theme Colors */
   --color-bg-primary: #282828;
   --color-bg-secondary: #3c3836;
   --color-bg-tertiary: #504945;
