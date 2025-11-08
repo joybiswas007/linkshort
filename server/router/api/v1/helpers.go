@@ -16,7 +16,7 @@ import (
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 // GenerateShortCode generates a random short code
-func (s *APIV1Service) GenerateShortCode(length int) (string, error) {
+func (s *APIV1Service) generateShortCode(length int) (string, error) {
 	code := make([]byte, length)
 	for i := range code {
 		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
