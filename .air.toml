@@ -4,8 +4,8 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./tmp/linkshort"
-  cmd = "CGO_ENABLED=1 go build -o ./tmp/linkshort ./cmd/api/main.go"
+  bin = "./linkshort"
+  cmd = "make build"
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "web", "node_modules"]
   exclude_file = []
