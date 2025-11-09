@@ -67,7 +67,7 @@ make docker-setup
 
 **Notes:**
 - Ensure `.linkshort.yaml` is in your working directory and mounted into the container
-- Database migrations run automatically on container startup[2]
+- Database migrations run automatically on container startup
 - Access the app at [http://localhost:8000](http://localhost:8000)
 
 ***
