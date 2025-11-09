@@ -1,0 +1,56 @@
+version: "2"
+
+linters:
+  enable:
+    - revive
+    - govet
+    - staticcheck
+    - misspell
+    - gocritic
+    - sqlclosecheck
+    - rowserrcheck
+    - nilerr
+    - godot
+    - mirror
+    - bodyclose
+  disable:
+    - errcheck
+  settings:
+    exhaustive:
+      explicit-exhaustive-switch: false
+    staticcheck:
+      checks:
+        - all
+        - -ST1000
+        - -ST1003
+        - -ST1021
+        - -QF1003
+    gocritic:
+      disabled-checks:
+        - dupImport # https://github.com/go-critic/go-critic/issues/845
+        - ifElseChain
+        - octalLiteral
+        - whyNoLint
+        - wrapperFunc
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    govet:
+      settings:
+        printf: # The name of the analyzer, run `go tool vet help` to see the list of all analyzers
+          funcs: # Run `go tool vet help printf` to see the full configuration of `printf`.
+            - common.Errorf
+      enable-all: true
+      disable:
+        - fieldalignment
+        - shadow
+formatters:
+  enable:
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/joybiswas007/linkshort
