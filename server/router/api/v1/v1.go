@@ -8,20 +8,21 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/julienschmidt/httprouter"
+
 	"github.com/joybiswas007/linkshort/config"
 	"github.com/joybiswas007/linkshort/internal/database"
 	"github.com/joybiswas007/linkshort/server/router/frontend"
-	"github.com/julienschmidt/httprouter"
 )
 
 // APIV1Service handles all API v1 endpoints and dependencies.
 type APIV1Service struct {
-	cfg config.Config
+	cfg *config.Config
 	db  database.Models
 }
 
 // NewAPIV1Service creates a new API v1 service instance.
-func NewAPIV1Service(cfg config.Config, db database.Models) *APIV1Service {
+func NewAPIV1Service(cfg *config.Config, db database.Models) *APIV1Service {
 	return &APIV1Service{
 		cfg: cfg,
 		db:  db,
@@ -50,12 +51,11 @@ func (s *APIV1Service) RegisterRoutes() http.Handler {
 	// serve the frontend
 	frontend.Serve(r)
 
-	switch s.cfg.Env {
-	case "production":
+	if s.cfg.IsProduction {
 		return s.recoverPanic(s.rateLimit(r))
-	default:
-		return s.recoverPanic(s.enableCORS(s.rateLimit(r)))
 	}
+
+	return s.recoverPanic(s.enableCORS(s.rateLimit(r)))
 }
 
 func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -101,7 +101,7 @@ func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, 
 
 	link := &database.Link{
 		Code:        shortCode,
-		ShortURL:    fmt.Sprintf("http://localhost:8000/%s", shortCode),
+		ShortURL:    fmt.Sprintf("%s/u/%s", s.cfg.Domain, shortCode),
 		OriginalURL: input.URL,
 	}
 

@@ -21,7 +21,7 @@ func (s *APIV1Service) recoverPanic(next http.Handler) http.Handler {
 }
 
 func (s *APIV1Service) rateLimit(next http.Handler) http.Handler {
-	limiter := rate.NewLimiter(rate.Limit(s.cfg.Limiter.Rps), s.cfg.Limiter.Burst)
+	limiter := rate.NewLimiter(rate.Limit(s.cfg.RateLimiter.Rate), s.cfg.RateLimiter.Burst)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !limiter.Allow() {
 			s.errorResponse(w, http.StatusTooManyRequests, "too many requests")

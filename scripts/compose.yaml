@@ -8,6 +8,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - .linkshort.yaml:/app/.linkshort.yaml
       - ./links.db:/app/links.db
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro

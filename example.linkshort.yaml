@@ -1,0 +1,9 @@
+# Main server port for the application (e.g. admin panel, etc.)
+port: 8000
+# Rate limiting configuration
+rate_limiter:
+  rate: 1 # Allowed requests per second
+  burst: 25 # Maximum burst size (temporary request overflow)
+is_production: true
+domain: "https://sitename.com" # Domain URL
+db_name: links.db # SQLite DB Name

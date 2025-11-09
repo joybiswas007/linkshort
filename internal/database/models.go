@@ -1,3 +1,4 @@
+// Package database provides PostgreSQL database access and models for the linkshort.
 package database
 
 import (
@@ -13,16 +14,13 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Models contains all database models.
 type Models struct {
 	Links LinkModel
 }
 
-var (
-	dbName = "links.db"
-)
-
 // New creates a new database connection to an SQLite database.
-func New() (*sql.DB, error) {
+func New(dbName string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", dbName)
 	if err != nil {
 		return nil, fmt.Errorf("could not open db: %v", err)
@@ -38,6 +36,7 @@ func New() (*sql.DB, error) {
 	return db, nil
 }
 
+// NewModels initializes all database models.
 func NewModels(db *sql.DB) Models {
 	return Models{
 		Links: LinkModel{DB: db},
@@ -47,7 +46,7 @@ func NewModels(db *sql.DB) Models {
 // Migrate applies database migrations for an sqlite3 database.
 // It reads migration files from the designated migration folder and
 // ensures the database schema is updated accordingly.
-func Migrate(db *sql.DB) error {
+func Migrate(dbName string, db *sql.DB) error {
 	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
 	if err != nil {
 		return err

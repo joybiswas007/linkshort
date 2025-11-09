@@ -47,10 +47,10 @@ func Serve(r *httprouter.Router) {
 }
 
 func getFileSystem(path string) http.FileSystem {
-	fs, err := fs.Sub(embeddedFiles, path)
+	fileSystem, err := fs.Sub(embeddedFiles, path)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	return http.FS(fs)
+	return http.FS(fileSystem)
 }

@@ -19,7 +19,7 @@ type Server struct {
 }
 
 // NewServer creates and configures a new HTTP server instance.
-func NewServer(cfg config.Config, db *sql.DB) *http.Server {
+func NewServer(cfg *config.Config, db *sql.DB) *http.Server {
 	NewServer := &Server{
 		port:   cfg.Port,
 		models: database.NewModels(db),

@@ -28,4 +28,4 @@ RUN apk add --no-cache tzdata
 ENV TZ="UTC"
 COPY --from=backend /backend-build/linkshort /app/linkshort
 ENTRYPOINT [ "/app/linkshort" ]
-CMD [ "--env", "production" ]
+CMD [ "--conf", "/app/.linkshort.yaml" ]

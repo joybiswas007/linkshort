@@ -1,3 +1,4 @@
+// Package main is the entry point for the linkshort API server.
 package main
 
 import (
@@ -24,17 +25,21 @@ var (
 )
 
 func main() {
-	var cfg config.Config
+	var cfgFile string
 
-	flag.IntVar(&cfg.Port, "port", 8000, "API server port")
-	flag.StringVar(&cfg.Env, "env", "development", "Environment (development|production)")
-
-	flag.Float64Var(&cfg.Limiter.Rps, "limiter-rps", 1, "Rate limiter maximum requests per second")
-	flag.IntVar(&cfg.Limiter.Burst, "limiter-burst", 10, "Rate limiter maximum burst")
+	flag.StringVar(&cfgFile, "conf", "", "Path to configuration file (default: $PWD/.linkshort.yaml)")
+	flag.Parse()
 
 	flag.Parse()
 
-	db, err := database.New()
+	config.Init(cfgFile)
+
+	cfg, err := config.GetAll()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	db, err := database.New(cfg.DBName)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -43,7 +48,7 @@ func main() {
 		db.Close()
 	}()
 
-	if err := database.Migrate(db); err != nil {
+	if err := database.Migrate(cfg.DBName, db); err != nil {
 		log.Panic(err)
 	}
 
@@ -59,7 +64,7 @@ func main() {
 	}
 	cfg.BuildInfo = bi
 
-	srv := server.NewServer(cfg, db)
+	srv := server.NewServer(&cfg, db)
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool)
