@@ -31,7 +31,7 @@ func (s *APIV1Service) rateLimit(next http.Handler) http.Handler {
 	})
 }
 
-// CORS middleware
+// CORS middleware.
 func (s *APIV1Service) enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// CORS headers
