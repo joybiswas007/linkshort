@@ -105,7 +105,7 @@ make docker-setup
 
 1. **Prerequisites**
    
-   Install Go 1.21+ and ensure it's in your PATH.
+   Install Go 1.25+ and ensure it's in your PATH.
 
 2. **Configure**
    ```bash
