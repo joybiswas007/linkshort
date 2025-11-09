@@ -21,6 +21,12 @@ You can run LinkShort with Docker or manually.
 #### Prerequisites
 - Docker & Docker Compose
 
+**Check your environment:**
+```bash
+# use the setup checker
+make docker-setup
+```
+
 #### Steps
 
 1. **Copy Docker configuration files**

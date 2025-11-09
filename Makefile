@@ -30,11 +30,6 @@ build:
 	@echo "==> Building API binary: $(BINARY_NAME)"
 	@CGO_ENABLED=1 go build $(LDFLAGS) -o $(BINARY_NAME) $(API_ENTRY)
 
-# Run the API application directly.
-run:
-	@echo "==> Running API from $(API_ENTRY)..."
-	@go run $(API_ENTRY)
-
 
 # ------------------------------------------------------------------------------
 # Docker Targets
@@ -90,3 +85,29 @@ watch:
 	fi
 	@echo "==> Starting Air for live reload...";
 	@air
+
+# ------------------------------------------------------------------------------
+# Housekeeping
+# ------------------------------------------------------------------------------
+# Clean up built binaries.
+clean:
+	@echo "==> Cleaning up binaries..."
+	@rm -f $(BINARY_NAME)
+
+# Show a helpful message with all available targets.
+help:
+	@echo "Usage: make <target>"
+	@echo ""
+	@echo "Targets:"
+	@echo "  build           Build the main API binary"
+	@echo "  watch           Live reload the application using Air"
+	@echo ""
+	@echo "  docker-setup    Ensure the environment is ready."
+	@echo "  build-docker    Start Docker containers"
+	@echo "  re-build-docker Rebuild and start Docker containers"
+	@echo "  docker-down     Shutdown the Docker containers"
+	@echo ""
+	@echo "  test            Run all tests"
+	@echo "  lint            Run the linter"
+	@echo "  clean           Remove built binaries"
+	@echo "  help            Show this help message"
