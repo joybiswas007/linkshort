@@ -1,4 +1,4 @@
-# Main server port for the application (e.g. admin panel, etc.)
+# Main server port for the application
 port: 8000
 # Rate limiting configuration
 rate_limiter:

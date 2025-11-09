@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Link represents a shortened URL entry with metadata.
 type Link struct {
 	ID          int       `json:"-"`
 	Code        string    `json:"code"`
@@ -17,12 +18,13 @@ type Link struct {
 	UpdatedAt   time.Time `json:"-"`
 }
 
+// LinkModel provides database operations for shortened links.
 type LinkModel struct {
 	DB *sql.DB
 }
 
-// Create inserts a new shortened URL into the database and returns the generated ID
-// It returns an error if the insert fails
+// Create inserts a new shortened URL into the database and returns the generated ID.
+// It returns an error if the insert fails.
 func (m *LinkModel) Create(link *Link) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -44,6 +46,8 @@ func (m *LinkModel) Create(link *Link) error {
 	return nil
 }
 
+// Exists checks whether a short code is already in use.
+// Returns true if the code exists, false otherwise.
 func (m LinkModel) Exists(code string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -59,6 +63,8 @@ func (m LinkModel) Exists(code string) (bool, error) {
 	return exists, nil
 }
 
+// GetByCode retrieves a shortened link by its unique code.
+// Returns sql.ErrNoRows if the code does not exist.
 func (m LinkModel) GetByCode(code string) (*Link, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

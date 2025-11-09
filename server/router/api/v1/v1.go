@@ -35,7 +35,7 @@ func (s *APIV1Service) RegisterRoutes() http.Handler {
 
 	r.POST("/api/v1/links", s.shortLinkHandler)
 	r.GET("/api/v1/links/:code", s.linkByCodeHandler)
-	r.GET("/api/v1/build-info", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	r.GET("/api/v1/build-info", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 		runtimeVersion := runtime.Version()
 		bi := map[string]any{
 			"go_version": runtimeVersion,
@@ -121,7 +121,7 @@ func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, 
 	}
 }
 
-func (s *APIV1Service) linkByCodeHandler(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func (s *APIV1Service) linkByCodeHandler(w http.ResponseWriter, _ *http.Request, params httprouter.Params) {
 	code := params.ByName("code")
 	if code == "" {
 		s.errorResponse(w, http.StatusBadRequest, "missing required path parameter: code")
