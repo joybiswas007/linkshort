@@ -4,6 +4,7 @@ package v1
 import (
 	"fmt"
 	"net/http"
+	"runtime"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -33,6 +34,18 @@ func (s *APIV1Service) RegisterRoutes() http.Handler {
 
 	r.POST("/api/v1/links", s.shortLinkHandler)
 	r.GET("/api/v1/links/:code", s.linkByCodeHandler)
+	r.GET("/api/v1/build-info", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		runtimeVersion := runtime.Version()
+		bi := map[string]any{
+			"go_version": runtimeVersion,
+			"build_info": s.cfg.BuildInfo,
+		}
+
+		err := s.writeJSON(w, http.StatusOK, bi)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	})
 
 	// serve the frontend
 	frontend.Serve(r)

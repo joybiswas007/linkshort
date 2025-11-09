@@ -11,6 +11,8 @@ type Config struct {
 
 	// Limiter configures request rate limiting to protect the server.
 	Limiter Limiter
+
+	BuildInfo Build // BuildInfo holds build metadata injected via ldflags for version tracking.
 }
 
 // Limiter defines token‑bucket rate limit settings used by middleware
@@ -21,4 +23,13 @@ type Limiter struct {
 
 	// Burst is the maximum burst size allowed above the steady Rps.
 	Burst int
+}
+
+// Build holds metadata about the application's build process, including
+// git commit hash, branch name, and build timestamp. These values are
+// injected at compile time via ldflags for version tracking and debugging.
+type Build struct {
+	Commit string `json:"commit"` // Build commit hash from git rev-parse
+	Branch string `json:"branch"` // Build branch from git rev-parse
+	Time   int64  `json:"time"`   // Build time from date command
 }

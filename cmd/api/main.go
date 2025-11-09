@@ -7,12 +7,20 @@ import (
 	"log"
 	"net/http"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
 	"github.com/joybiswas007/linkshort/config"
 	"github.com/joybiswas007/linkshort/internal/database"
 	"github.com/joybiswas007/linkshort/server"
+)
+
+// These variables are populated by the linker at build time.
+var (
+	BuildCommit string
+	BuildBranch string
+	BuildTime   string
 )
 
 func main() {
@@ -38,6 +46,18 @@ func main() {
 	if err := database.Migrate(db); err != nil {
 		log.Panic(err)
 	}
+
+	buildTime, err := strconv.ParseInt(BuildTime, 10, 64)
+	if err != nil {
+		log.Panicf("Parse failed: could not convert string to int64: %v", err)
+	}
+
+	bi := config.Build{
+		Branch: BuildBranch,
+		Commit: BuildCommit,
+		Time:   buildTime,
+	}
+	cfg.BuildInfo = bi
 
 	srv := server.NewServer(cfg, db)
 

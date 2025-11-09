@@ -9,12 +9,8 @@ services:
       - "8000:8000"
     volumes:
       - ./links.db:/app/links.db
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=Asia/Dhaka
     restart: unless-stopped
-    healthcheck:
-      test: curl -f http://127.0.0.1:8000/api/v1/healthz || exit 1
-      interval: 3600s
-      timeout: 5s
-      retries: 3
-      start_period: 40s
