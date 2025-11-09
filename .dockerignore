@@ -1,0 +1,38 @@
+# Go build artifacts
+linkshort
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Dependency directories
+vendor/
+web/node_modules
+web/dist
+*.md
+tmp
+
+# Git and editor files
+# .git # we need build info for higher purpose
+# .gitignore
+*.swp
+*.swo
+*.bak
+*.tmp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# IDE/editor config
+.vscode/
+.idea/
+
+# config files
+.air.toml

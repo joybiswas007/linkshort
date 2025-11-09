@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/joybiswas007/linkshort/config"
 	"github.com/joybiswas007/linkshort/internal/database"
 	"github.com/joybiswas007/linkshort/server/router/frontend"
 	"github.com/julienschmidt/httprouter"
@@ -14,12 +15,16 @@ import (
 
 // APIV1Service handles all API v1 endpoints and dependencies.
 type APIV1Service struct {
-	db database.Models
+	cfg config.Config
+	db  database.Models
 }
 
 // NewAPIV1Service creates a new API v1 service instance.
-func NewAPIV1Service(db database.Models) *APIV1Service {
-	return &APIV1Service{db: db}
+func NewAPIV1Service(cfg config.Config, db database.Models) *APIV1Service {
+	return &APIV1Service{
+		cfg: cfg,
+		db:  db,
+	}
 }
 
 // RegisterRoutes configures and returns an HTTP handler with all API v1 routes.
@@ -32,10 +37,8 @@ func (s *APIV1Service) RegisterRoutes() http.Handler {
 	// serve the frontend
 	frontend.Serve(r)
 
-	production := false
-
-	switch production {
-	case true:
+	switch s.cfg.Env {
+	case "production":
 		return s.recoverPanic(s.rateLimit(r))
 	default:
 		return s.recoverPanic(s.enableCORS(s.rateLimit(r)))

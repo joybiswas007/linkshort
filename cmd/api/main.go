@@ -10,17 +10,20 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/joybiswas007/linkshort/config"
 	"github.com/joybiswas007/linkshort/internal/database"
 	"github.com/joybiswas007/linkshort/server"
 )
 
-type application struct {
-	port int
-}
-
 func main() {
-	var app application
-	flag.IntVar(&app.port, "port", 8000, "--port")
+	var cfg config.Config
+
+	flag.IntVar(&cfg.Port, "port", 8000, "API server port")
+	flag.StringVar(&cfg.Env, "env", "development", "Environment (development|production)")
+
+	flag.Float64Var(&cfg.Limiter.Rps, "limiter-rps", 1, "Rate limiter maximum requests per second")
+	flag.IntVar(&cfg.Limiter.Burst, "limiter-burst", 10, "Rate limiter maximum burst")
+
 	flag.Parse()
 
 	db, err := database.New()
@@ -36,7 +39,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	srv := server.NewServer(app.port, db)
+	srv := server.NewServer(cfg, db)
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool)

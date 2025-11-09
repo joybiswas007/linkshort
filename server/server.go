@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/joybiswas007/linkshort/config"
 	"github.com/joybiswas007/linkshort/internal/database"
 	v1 "github.com/joybiswas007/linkshort/server/router/api/v1"
 )
@@ -18,13 +19,13 @@ type Server struct {
 }
 
 // NewServer creates and configures a new HTTP server instance.
-func NewServer(port int, db *sql.DB) *http.Server {
+func NewServer(cfg config.Config, db *sql.DB) *http.Server {
 	NewServer := &Server{
-		port:   port,
+		port:   cfg.Port,
 		models: database.NewModels(db),
 	}
 
-	v1Server := v1.NewAPIV1Service(NewServer.models)
+	v1Server := v1.NewAPIV1Service(cfg, NewServer.models)
 
 	// Declare Server config.
 	server := &http.Server{
