@@ -9,7 +9,7 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/:code" element={<Redirect />} />
+          <Route path="/u/:code" element={<Redirect />} />
         </Route>
       </Routes>
     </Router>
