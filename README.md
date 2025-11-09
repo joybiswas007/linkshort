@@ -29,15 +29,8 @@ make docker-setup
 
 #### Steps
 
-1. **Copy Docker configuration files**
-   
-   The `scripts` directory contains ready-to-use Docker configurations:
-   ```bash
-   cp scripts/Dockerfile .
-   cp scripts/compose.yaml .
-   ```
 
-2. **Prepare environment variables**
+1. **Prepare environment variables**
    
    Copy and edit the configuration files:
    ```bash
@@ -50,17 +43,17 @@ make docker-setup
    # Edit web/.env to match your environment
    ```
 
-3. **Build and start**
+2. **Build and start**
    ```bash
    make build-docker
    ```
 
-4. **Rebuild (if needed)**
+3. **Rebuild (if needed)**
    ```bash
    make re-build-docker
    ```
 
-5. **Stop**
+4. **Stop**
    ```bash
    make down-docker
    ```
