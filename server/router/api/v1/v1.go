@@ -101,7 +101,7 @@ func (s *APIV1Service) shortLinkHandler(w http.ResponseWriter, r *http.Request, 
 
 	link := &database.Link{
 		Code:        shortCode,
-		ShortURL:    fmt.Sprintf("%s/u/%s", s.cfg.Domain, shortCode),
+		ShortURL:    fmt.Sprintf("%s/%s", s.cfg.Domain, shortCode),
 		OriginalURL: input.URL,
 	}
 
