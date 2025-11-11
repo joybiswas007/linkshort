@@ -40,10 +40,15 @@ func Serve(r *httprouter.Router) {
 			}
 			asset, err := distFS.Open(assetPath)
 			if err != nil {
-				asset, err = distFS.Open("index.html")
+				index, err := distFS.Open("index.html")
 				if err != nil {
 					log.Panic(err)
 				}
+				defer index.Close()
+
+				indexStat, _ := index.Stat()
+				http.ServeContent(w, r, "index.html", indexStat.ModTime(), index)
+				return
 			}
 			defer asset.Close()
 
