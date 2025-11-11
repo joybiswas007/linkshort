@@ -50,7 +50,6 @@ func Serve(r *httprouter.Router) {
 }
 
 // serveIndex opens and serves the index.html file from the embedded filesystem.
-// It panics if index.html cannot be opened, as this is a critical error.
 func serveIndex(fsys http.FileSystem, w http.ResponseWriter, r *http.Request) {
 	index, err := fsys.Open("index.html")
 	if err != nil {
