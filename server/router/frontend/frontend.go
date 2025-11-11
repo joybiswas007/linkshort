@@ -6,6 +6,8 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"path"
+	"strings"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -30,11 +32,30 @@ func Serve(r *httprouter.Router) {
 		http.ServeContent(w, r, "index.html", stat.ModTime(), index)
 	})
 
-	r.NotFound = http.FileServer(distFS)
+	r.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.HasPrefix(r.RequestURI, "/api") {
+			assetPath := strings.TrimPrefix(r.RequestURI, "/")
+			if assetPath == "" {
+				assetPath = "index.html"
+			}
+			asset, err := distFS.Open(assetPath)
+			if err != nil {
+				asset, err = distFS.Open("index.html")
+				if err != nil {
+					log.Panic(err)
+				}
+			}
+			defer asset.Close()
+
+			stat, _ := asset.Stat()
+
+			http.ServeContent(w, r, path.Base(r.RequestURI), stat.ModTime(), asset)
+		}
+	})
 }
 
-func getFileSystem(path string) http.FileSystem {
-	fileSystem, err := fs.Sub(embeddedFiles, path)
+func getFileSystem(fsPath string) http.FileSystem {
+	fileSystem, err := fs.Sub(embeddedFiles, fsPath)
 	if err != nil {
 		log.Panic(err)
 	}
