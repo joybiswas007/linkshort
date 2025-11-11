@@ -28,8 +28,8 @@ const Footer = () => {
   const formatBuildTime = (timestamp) => {
     if (!timestamp) return "";
 
-    // Convert seconds to milliseconds
-    const date = new Date(timestamp * 1000);
+    // Handle milliseconds timestamp (13 digits)
+    const date = new Date(timestamp);
 
     const month = date.toLocaleString("en-US", { month: "short" });
     const day = date.getDate();
@@ -42,74 +42,102 @@ const Footer = () => {
 
   const repoUrl = "https://github.com/joybiswas007/linkshort";
 
-  const BuildInfoContent = ({ isMobile }) => (
-    <>
-      <div
-        className={`flex items-center ${isMobile ? "justify-center" : "justify-start"} gap-3`}
-      >
-        <span style={{ color: "var(--color-aqua)" }}>
-          {buildInfo.go_version}
-        </span>
-        <span style={{ color: "var(--color-fg-muted)" }}>•</span>
-        <span style={{ color: "var(--color-purple)" }}>
-          {buildInfo.build_info?.branch}
-        </span>
-        <span style={{ color: "var(--color-fg-muted)" }}>•</span>
-        <Link
-          to={`${repoUrl}/commit/${buildInfo.build_info?.commit}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-mono hover:underline"
-          style={{ color: "var(--color-yellow)" }}
-        >
-          {buildInfo.build_info?.commit?.substring(0, 7)}
-        </Link>
-      </div>
-
-      <div className={isMobile ? "text-center" : ""}>
-        <span style={{ color: "var(--color-fg-muted)" }}>&copy; {year}</span>
-      </div>
-    </>
-  );
-
   return (
     <footer style={{ backgroundColor: "var(--color-bg-primary)" }}>
-      <div className="mx-auto w-full max-w-3xl px-4 py-4">
+      <div className="mx-auto w-full max-w-3xl px-4 py-3">
         {!error && buildInfo ? (
           <>
-            <div className="hidden md:grid md:grid-cols-3 items-center gap-4 text-sm">
-              <BuildInfoContent isMobile={false} />
-
-              <div className="text-right">
+            {/* Desktop layout */}
+            <div className="hidden md:flex md:items-center md:justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <span style={{ color: "var(--color-fg-muted)" }}>
+                  Built on:
+                </span>
                 {buildInfo.build_info?.time && (
-                  <span style={{ color: "var(--color-fg-muted)" }}>
-                    Built {formatBuildTime(buildInfo.build_info.time)}
+                  <span style={{ color: "var(--color-fg-secondary)" }}>
+                    {formatBuildTime(buildInfo.build_info.time)}
                   </span>
                 )}
               </div>
+
+              <div className="flex items-center gap-2">
+                <Link
+                  to={`${repoUrl}/commit/${buildInfo.build_info?.commit}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono hover:underline"
+                  style={{ color: "var(--color-yellow)" }}
+                  title={buildInfo.build_info?.commit}
+                >
+                  {buildInfo.build_info?.commit?.substring(0, 7)}
+                </Link>
+                <span style={{ color: "var(--color-fg-muted)" }}>•</span>
+                <span style={{ color: "var(--color-purple)" }}>
+                  {buildInfo.build_info?.branch}
+                </span>
+                <span style={{ color: "var(--color-fg-muted)" }}>•</span>
+                <span style={{ color: "var(--color-aqua)" }}>
+                  {buildInfo.go_version}
+                </span>
+              </div>
+
+              <div>
+                <span style={{ color: "var(--color-fg-muted)" }}>
+                  &copy; {year}
+                </span>
+              </div>
             </div>
 
-            <div className="md:hidden space-y-2 text-sm">
-              <BuildInfoContent isMobile={true} />
+            {/* Mobile layout */}
+            <div className="md:hidden space-y-2 text-xs text-center">
+              <div className="flex items-center justify-center gap-2">
+                <span style={{ color: "var(--color-aqua)" }}>
+                  {buildInfo.go_version}
+                </span>
+                <span style={{ color: "var(--color-fg-muted)" }}>•</span>
+                <span style={{ color: "var(--color-purple)" }}>
+                  {buildInfo.build_info?.branch}
+                </span>
+                <span style={{ color: "var(--color-fg-muted)" }}>•</span>
+                <Link
+                  to={`${repoUrl}/commit/${buildInfo.build_info?.commit}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono hover:underline"
+                  style={{ color: "var(--color-yellow)" }}
+                  title={buildInfo.build_info?.commit}
+                >
+                  {buildInfo.build_info?.commit?.substring(0, 7)}
+                </Link>
+              </div>
+
+              {buildInfo.build_info?.time && (
+                <div>
+                  <span style={{ color: "var(--color-fg-muted)" }}>
+                    Built on:{" "}
+                  </span>
+                  <span style={{ color: "var(--color-fg-secondary)" }}>
+                    {formatBuildTime(buildInfo.build_info.time)}
+                  </span>
+                </div>
+              )}
+
+              <div>
+                <span style={{ color: "var(--color-fg-muted)" }}>
+                  &copy; {year}
+                </span>
+              </div>
             </div>
           </>
         ) : error ? (
-          <div className="text-center">
-            <span
-              className="text-sm"
-              style={{ color: "var(--color-fg-muted)" }}
-            >
+          <div className="text-center text-xs">
+            <span style={{ color: "var(--color-fg-muted)" }}>
               &copy; {year}
             </span>
           </div>
         ) : (
-          <div className="text-center">
-            <span
-              className="text-sm"
-              style={{ color: "var(--color-fg-muted)" }}
-            >
-              Loading...
-            </span>
+          <div className="text-center text-xs">
+            <span style={{ color: "var(--color-fg-muted)" }}>Loading...</span>
           </div>
         )}
       </div>
