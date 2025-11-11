@@ -9,7 +9,7 @@ RUN npm run build
 # Backend build stage
 FROM golang:1.25.3-alpine AS backend
 WORKDIR /backend-build
-RUN apk --no-cache add git build-base make
+RUN apk --no-cache add git build-base make coreutils
 ENV GOPROXY=direct
 COPY go.mod go.sum ./
 ENV GOCACHE=/go-cache
